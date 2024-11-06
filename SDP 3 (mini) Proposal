@@ -1,0 +1,34 @@
+@mrjoswald
+
+A description of your project.
+
+My project is a 3D urban traffic simulation that models the interactions between vehicles and pedestrians in a virtual city environment. The simulation features a dynamic cityscape where cars and buses navigate through streets in different speeds while pedestrians walk along sidewalks. It incorporates basic collision detection between vehicles and pedestrians and includes dynamic weather effects that influence traffic behavior. The simulation provides a bird's-eye view of the city, allowing users to observe and interact with the urban ecosystem in real time.
+
+What purpose does it serve (artistic, functional, exploratory, entertainment, etc.)?
+
+The purpose of this project is exploratory, educational, and entertaining. It serves as a simplified model to understand urban traffic dynamics, pedestrian behavior, and their interactions. While it’s not the most real-world experience, it provides an engaging platform for users to experiment with different scenarios, such as increasing vehicle or pedestrian density, and observing the resulting patterns. This simulation can be a valuable tool for students learning about urban planning, traffic management, or even as a starting point for more complex city simulations, as people can learn about how traffic dynamics work in smaller cities (like Omaha, Nebraska) and apply the knowledge to more complex cities (NYC!!).
+
+
+How will users interface with it?
+
+
+Users interface with the simulation through a simple yet intuitive SwiftUI-based control panel. They can start or pause the simulation, add new vehicles (cars or buses) or pedestrians to the environment, and view real-time statistics about the number of entities in the simulation, like the weather and speed of the cars. The 3D scene, rendered using SceneKit, provides a clear visual representation of the city and its inhabitants. Future enhancements could include more interactive elements, such as the ability to modify the city layout or adjust traffic signal patterns in real-time.
+
+The language, libraries, and any other tools you will use.
+
+- Language: Swift
+- Frameworks and Libraries:
+  - SwiftUI for the user interface
+  - SceneKit for 3D rendering
+  - Foundation for basic Swift functionality
+
+
+What will a successful project look like?
+
+A successful project will demonstrate:
+1. Stable and consistent performance, handling multiple vehicles and pedestrians without significant lag.
+2. Realistic movement patterns for both vehicles and pedestrians within the city environment.
+3. Functional collision detection that accurately identifies and reports potential conflicts between two bodies.
+4. A smart user interface that allows for easy control and modification of the simulation parameters.
+5. Vehicles in rain change speed successfully, with a constant rate on how much they change but still different speeds for different vehicles
+6. Clear visual representation of the city, vehicles, and pedestrians, providing an engaging and informative view of the simulation.
