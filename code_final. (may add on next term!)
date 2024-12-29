@@ -1,0 +1,167 @@
+// needs import func for code to work
+
+import SwiftUI
+import SceneKit
+
+// Vehicle and Pedestrian Models
+
+enum VehicleType: String, CaseIterable {
+    case car, bus
+}
+
+struct Vehicle: Identifiable {
+    let id = UUID()
+    let type: VehicleType
+    var position: SCNVector3
+    var speed: Float
+    
+    mutating func move() {
+        position.x += speed
+        if position.x > 50 || position.x < -50 { speed *= -1 } // Bounce back
+    }
+}
+
+struct Pedestrian: Identifiable {
+    let id = UUID()
+    var position: SCNVector3
+    
+    mutating func walk() {
+        position.x += Float.random(in: -0.05...0.05)
+        if position.x > 50 { position.x = 50 }
+        if position.x < -50 { position.x = -50 }
+    }
+}
+
+// City Class
+
+class City: ObservableObject {
+    @Published var vehicles: [Vehicle] = []
+    @Published var pedestrians: [Pedestrian] = []
+    
+    init() {
+        addInitialEntities()
+    }
+    
+    private func addInitialEntities() {
+        for _ in 0..<5 {
+            vehicles.append(Vehicle(type: .car, position: SCNVector3(Float.random(in: -25...25), 0, 0), speed: Float.random(in: 0.1...0.5)))
+            pedestrians.append(Pedestrian(position: SCNVector3(Float.random(in: -25...25), 0, 0)))
+        }
+    }
+    
+    func update() {
+        for i in vehicles.indices { vehicles[i].move() }
+        for i in pedestrians.indices { pedestrians[i].walk() }
+    }
+}
+
+// SceneView = main 3d graphics of sim -- visuals basically
+
+struct SceneView: UIViewRepresentable {
+    @ObservedObject var city: City
+    
+    func makeUIView(context: Context) -> SCNView {
+        let sceneView = SCNView()
+        let scene = SCNScene()
+        
+        // my Camera setup
+        let cameraNode = SCNNode()
+        cameraNode.camera = SCNCamera()
+        cameraNode.position = SCNVector3(x: 0, y: 100, z: 100)
+        scene.rootNode.addChildNode(cameraNode)
+        
+        // my Ground setup
+        let groundNode = SCNNode(geometry: SCNFloor())
+        scene.rootNode.addChildNode(groundNode)
+        
+        sceneView.scene = scene
+        sceneView.autoenablesDefaultLighting = true
+        
+        return sceneView
+    }
+    
+    func updateUIView(_ sceneView: SCNView, context: Context) {
+       guard let scene = sceneView.scene else { return }
+
+       // Update the vehicle nodes
+       for vehicle in city.vehicles {
+           let vehicleNode = createVehicleNode(for: vehicle)
+           scene.rootNode.addChildNode(vehicleNode)
+       }
+
+       // Update the pedestrian nodes
+       for pedestrian in city.pedestrians {
+           let pedestrianNode = createPedestrianNode(for: pedestrian)
+           scene.rootNode.addChildNode(pedestrianNode)
+       }
+   }
+
+   private func createVehicleNode(for vehicle: Vehicle) -> SCNNode {
+       let geometry = SCNBox(width: 2, height: 1, length: 4, chamferRadius: 0)
+       let material = SCNMaterial()
+       material.diffuse.contents = UIColor.blue
+       geometry.materials = [material]
+       
+       let node = SCNNode(geometry: geometry)
+       node.position = vehicle.position
+       return node
+   }
+
+   private func createPedestrianNode(for pedestrian: Pedestrian) -> SCNNode {
+      let geometry = SCNSphere(radius: 0.5)
+      let material = SCNMaterial()
+      material.diffuse.contents = UIColor.green
+      
+      geometry.materials = [material]
+
+      let node = SCNNode(geometry: geometry)
+      node.position = pedestrian.position
+      return node
+   }
+}
+
+// content view = UI for user ie interacting with given buttons & stats
+
+struct ContentView : View{
+   @StateObject private var city=City()
+   @State private var isSimulationRunning=false
+   
+   var body : some View{
+      VStack{
+         SceneView(city : city).frame(height :500)
+
+         HStack{
+             Button(isSimulationRunning ? "Pause" : "Start") {
+                 isSimulationRunning.toggle()
+             }
+
+             Button("Add Car") {
+                 city.vehicles.append(Vehicle(type:.car,
+                                              position:.init(x:.random(in:-25...25),y:.random(in:-1...1),z:.random(in:-25...25)),
+                                              speed:.random(in:-0.1...0.5)))
+             }
+
+             Button("Add Pedestrian") {
+                 city.pedestrians.append(Pedestrian(position:.init(x:.random(in:-25...25),y:.random(in:-1...1),z:.random(in:-25...25))))
+             }
+         }
+
+         Text("Vehicles Count : \(city.vehicles.count)")
+         Text("Pedestrians Count : \(city.pedestrians.count)")
+     }.onChange(of:isSimulationRunning){ isRunning in 
+         if isRunning { 
+             Timer.scheduledTimer(withTimeInterval :1/60 , repeats:true){_ in 
+                 city.update() 
+             } 
+         } 
+     }
+   }
+}
+
+// Preview of cont.
+
+struct ContentView_Previews : PreviewProvider{
+   static var previews : some View{
+      ContentView()
+   }
+}
